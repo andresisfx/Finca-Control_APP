@@ -10,10 +10,15 @@ class Settings(BaseSettings):
     """Configuración de la app, cargada desde .env"""
 
     DATABASE_URL: str
-    APP_NAME: str = "FincaControl API"
-    APP_VERSION: str = "1.0.0"
-    DEBUG: bool = False
-    SECRET_KEY: str = "change-this-in-production"
+    APP_NAME: str 
+    APP_VERSION: str 
+    #pasar DEBUG=True para entorno de desarrollo
+    #!pasar DEBUG=False para entorno de producción
+    DEBUG: bool 
+    SECRET_KEY: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    
 
     model_config = {
         "env_file": ".env",

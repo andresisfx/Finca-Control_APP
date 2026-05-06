@@ -1,6 +1,7 @@
 from datetime import date
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException, status
 
 from app.models.produccion_vendedor_diaria import ProduccionVendedorDiaria
@@ -72,6 +73,12 @@ def update_produccion(db: Session, produccion_id: int, produccion_in: Produccion
     return db_produccion
 
 def delete_produccion(db: Session, produccion_id: int) -> None:
-    db_produccion = get_produccion(db, produccion_id)
-    db.delete(db_produccion)
-    db.commit()
+    try:
+        db_produccion = db.get(ProduccionVendedorDiaria, produccion_id)
+        if not db_produccion:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Registro de producción no encontrado")
+        db.delete(db_produccion)
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error al eliminar el registro de producción")

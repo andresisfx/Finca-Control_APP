@@ -1,6 +1,7 @@
 import uuid
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException, status
 
 from app.models.quincena import Quincena
@@ -55,6 +56,12 @@ def update_quincena(db: Session, quincena_id: int, quincena_in: QuincenaUpdate) 
     return db_quincena
 
 def delete_quincena(db: Session, quincena_id: int) -> None:
-    db_quincena = get_quincena(db, quincena_id)
-    db.delete(db_quincena)
-    db.commit()
+    try:
+        db_quincena = db.get(Quincena, quincena_id)
+        if not db_quincena:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quincena no encontrada")
+        db.delete(db_quincena)
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error al eliminar la quincena")

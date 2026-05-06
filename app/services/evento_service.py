@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException, status
 
 from app.models.evento import Evento
@@ -45,6 +46,12 @@ def update_evento(db: Session, evento_id: int, evento_in: EventoUpdate) -> Event
     return db_evento
 
 def delete_evento(db: Session, evento_id: int) -> None:
-    db_evento = get_evento(db, evento_id)
-    db.delete(db_evento)
-    db.commit()
+    try:
+        db_evento = db.get(Evento, evento_id)
+        if not db_evento:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento no encontrado")
+        db.delete(db_evento)
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error al eliminar el evento")

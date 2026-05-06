@@ -1,6 +1,7 @@
 import uuid
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException, status
 
 from app.models.vendedor import Vendedor
@@ -45,6 +46,12 @@ def update_vendedor(db: Session, vendedor_id: int, vendedor_in: VendedorUpdate) 
     return db_vendedor
 
 def delete_vendedor(db: Session, vendedor_id: int) -> None:
-    db_vendedor = get_vendedor(db, vendedor_id)
-    db.delete(db_vendedor)
-    db.commit()
+    try:
+        db_vendedor = db.get(Vendedor, vendedor_id)
+        if not db_vendedor:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vendedor no encontrado")
+        db.delete(db_vendedor)
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error al eliminar el vendedor")

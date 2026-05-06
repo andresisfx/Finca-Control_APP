@@ -8,12 +8,13 @@ class UserBase(BaseModel):
     nombre: str = Field(..., min_length=5, max_length=150)
 
 class UserCreate(UserBase):
-    password: str = Field(..., min_length=8, max_length=128)
+    # los 3 puntos suspensivos significan que el campo es obligatorio
+    password: str = Field(..., min_length=8, max_length=72)
 
 class UserUpdate(BaseModel):
     email: EmailStr | None = None
     nombre: str | None = Field(None, min_length=5, max_length=150)
-    password: str | None = Field(None, min_length=8, max_length=128)
+    password: str | None = Field(None, min_length=8, max_length=72)
 
 class UserOut(UserBase):
     id: UUID4

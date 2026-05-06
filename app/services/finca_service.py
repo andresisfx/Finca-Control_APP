@@ -1,6 +1,7 @@
 import uuid
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException, status
 
 from app.models.finca import Finca
@@ -45,6 +46,12 @@ def update_finca(db: Session, finca_id: uuid.UUID, finca_in: FincaUpdate) -> Fin
     return db_finca
 
 def delete_finca(db: Session, finca_id: uuid.UUID) -> None:
-    db_finca = get_finca(db, finca_id)
-    db.delete(db_finca)
-    db.commit()
+    try:
+        db_finca = db.get(Finca, finca_id)
+        if not db_finca:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Finca no encontrada")
+        db.delete(db_finca)
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error al eliminar la finca")

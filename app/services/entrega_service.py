@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException, status
 
 from app.models.entrega import Entrega
@@ -41,6 +42,12 @@ def update_entrega(db: Session, entrega_id: int, entrega_in: EntregaUpdate) -> E
     return db_entrega
 
 def delete_entrega(db: Session, entrega_id: int) -> None:
-    db_entrega = get_entrega(db, entrega_id)
-    db.delete(db_entrega)
-    db.commit()
+    try:
+        db_entrega = db.get(Entrega, entrega_id)
+        if not db_entrega:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entrega no encontrada")
+        db.delete(db_entrega)
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error al eliminar la entrega")

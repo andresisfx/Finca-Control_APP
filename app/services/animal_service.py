@@ -1,3 +1,4 @@
+from sqlalchemy.exc import SQLAlchemyError
 import uuid
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -41,10 +42,10 @@ def create_animal(db: Session, animal_in: AnimalCreate) -> Animal:
 
 def update_animal(db: Session, animal_id: int, animal_in: AnimalUpdate) -> Animal:
     db_animal = get_animal(db, animal_id)
-    
+    #Excluye los campos que no se actualizaron, esto permite enviar solo los campos que se quieren actualizar
     update_data = animal_in.model_dump(exclude_unset=True)
     
-    # Si se actualiza el código, verificar que no colisione con otro
+    # Si se actualiza el código, verificar que no colisione con otro animal de la misma finca
     if "codigo" in update_data and update_data["codigo"] != db_animal.codigo:
         stmt = select(Animal).where(Animal.finca_id == db_animal.finca_id, Animal.codigo == update_data["codigo"])
         if db.scalars(stmt).first():
@@ -62,6 +63,15 @@ def update_animal(db: Session, animal_id: int, animal_in: AnimalUpdate) -> Anima
     return db_animal
 
 def delete_animal(db: Session, animal_id: int) -> None:
-    db_animal = get_animal(db, animal_id)
-    db.delete(db_animal)
-    db.commit()
+    try:
+        db_animal = db.get(Animal, animal_id)
+
+        if not db_animal:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Animal no encontrado")
+
+        db.delete(db_animal)
+        db.commit()
+
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error al eliminar el animal")
