@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
 from pydantic import ValidationError
+import uuid
 
 from app.db.session import get_db
 from app.config import get_settings
@@ -42,7 +43,12 @@ def get_current_user(
             detail="No se pudo validar las credenciales o el token ha expirado",
         )
         
-    user = db.get(User, user_id_str)
+    try:
+        user_uuid = uuid.UUID(user_id_str)
+    except ValueError:
+        raise HTTPException(status_code=401, detail="ID de usuario inválido en token")
+        
+    user = db.get(User, user_uuid)
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
         

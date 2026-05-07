@@ -38,8 +38,7 @@ def read_mis_fincas(
 @router.get("/{finca_id}", response_model=FincaOut)
 def read_finca(
     finca_id: UUID4, 
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """
     Obtiene los detalles de una finca específica.
@@ -50,8 +49,7 @@ def read_finca(
 def update_finca(
     finca_id: UUID4, 
     finca_in: FincaUpdate, 
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """
     Actualiza los datos de una finca.
@@ -61,8 +59,7 @@ def update_finca(
 @router.delete("/{finca_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_finca(
     finca_id: UUID4, 
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """
     Elimina una finca (Cascada eliminará animales, vendedores, etc.).
