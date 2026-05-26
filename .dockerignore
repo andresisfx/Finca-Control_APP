@@ -1,0 +1,52 @@
+# Entornos virtuales
+venv/
+.venv/
+env/
+
+# Caché de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Variables de entorno reales (nunca entran a la imagen)
+.env
+.env.*
+!.env.example
+
+# Tests y herramientas de desarrollo
+tests/
+.pytest_cache/
+pytest.ini
+setup.cfg
+.coverage
+htmlcov/
+coverage.xml
+
+# Control de versiones
+.git/
+.gitignore
+
+# Empaquetado Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Editores e IDEs
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Logs locales
+*.log
+
+# Documentación local (no necesaria en runtime)
+*.md
+docs/

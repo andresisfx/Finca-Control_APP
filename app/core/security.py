@@ -1,4 +1,6 @@
-from datetime import datetime, timedelta
+import hashlib
+import secrets
+from datetime import datetime, timedelta, timezone
 from typing import Any, Union
 from jose import jwt
 from passlib.context import CryptContext
@@ -17,10 +19,9 @@ def create_access_token(subject: Union[str, Any], expires_delta: timedelta = Non
     Genera un token JWT (JSON Web Token) válido para el usuario.
     """
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        # Si no se especifica, expira según la configuración (ej. 8 días)
-        expire = datetime.utcnow() + timedelta(
+        expire = datetime.now(timezone.utc) + timedelta(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
     
@@ -46,3 +47,15 @@ def get_password_hash(password: str) -> str:
     Convierte una contraseña en texto plano en un hash irreversible usando bcrypt.
     """
     return pwd_context.hash(password)
+
+
+def create_refresh_token_value() -> str:
+    return secrets.token_urlsafe(32)
+
+
+def hash_refresh_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+def verify_refresh_token(token: str, hashed: str) -> bool:
+    return hashlib.sha256(token.encode()).hexdigest() == hashed

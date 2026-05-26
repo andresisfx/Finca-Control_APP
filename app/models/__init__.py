@@ -5,6 +5,7 @@ Importar este módulo garantiza que Alembic detecte todas las tablas.
 
 from app.models.base import Base
 from app.models.user import User
+from app.models.refresh_token import RefreshToken
 from app.models.finca import Finca
 from app.models.animal import Animal
 from app.models.evento import Evento
@@ -16,15 +17,7 @@ from app.models.produccion_vendedor_diaria import ProduccionVendedorDiaria
 from app.models.entrega import Entrega
 
 __all__ = [
-    "Base",
-    "User",
-    "Finca",
-    "Animal",
-    "Evento",
-    "Vendedor",
-    "Comprador",
-    "Quincena",
-    "PrecioLeche",
-    "ProduccionVendedorDiaria",
-    "Entrega",
+    "Base", "User", "RefreshToken", "Finca", "Animal", "Evento",
+    "Vendedor", "Comprador", "Quincena", "PrecioLeche",
+    "ProduccionVendedorDiaria", "Entrega",
 ]
